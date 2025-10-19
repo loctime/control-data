@@ -7,6 +7,8 @@ import {
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
   onAuthStateChanged,
+  GoogleAuthProvider,
+  signInWithPopup,
 } from "firebase/auth"
 import { auth } from "@/lib/firebase"
 import { createDocument, getUserById, type User } from "@/lib/firestore"
@@ -17,6 +19,7 @@ interface AuthContextType {
   loading: boolean
   signUp: (email: string, password: string, displayName: string) => Promise<void>
   signIn: (email: string, password: string) => Promise<void>
+  signInWithGoogle: () => Promise<void>
   signOut: () => Promise<void>
 }
 
@@ -71,6 +74,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     await signInWithEmailAndPassword(auth, email, password)
   }
 
+  const signInWithGoogle = async () => {
+    const provider = new GoogleAuthProvider()
+    const result = await signInWithPopup(auth, provider)
+    const user = result.user
+
+    // Verificar si el usuario ya existe en Firestore
+    const existingProfile = await getUserById(user.uid)
+
+    // Si no existe, crear el perfil
+    if (!existingProfile) {
+      await createDocument<Omit<User, "id" | "createdAt" | "updatedAt">>("users", user.uid, {
+        email: user.email || "",
+        displayName: user.displayName || "Usuario",
+        bio: "",
+        skills: [],
+        followers: [],
+        following: [],
+        avatar: user.photoURL || undefined,
+      })
+    }
+  }
+
   const signOut = async () => {
     await firebaseSignOut(auth)
   }
@@ -81,6 +106,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     loading,
     signUp,
     signIn,
+    signInWithGoogle,
     signOut,
   }
 

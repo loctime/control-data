@@ -4,8 +4,11 @@ Una plataforma moderna para compartir conocimientos y habilidades, construida co
 
 ## Características
 
-- Autenticación de usuarios con Firebase Auth
-- Perfiles de usuario personalizables con habilidades y biografía
+- 🔐 Autenticación de usuarios con Firebase Auth
+  - Login con email y contraseña
+  - Login con Google (OAuth)
+  - Registro de nuevos usuarios
+- 👤 Perfiles de usuario personalizables con habilidades y biografía
 - Sistema de publicaciones con soporte para texto, imágenes, videos y enlaces
 - Feed personalizado basado en usuarios seguidos
 - Sistema de likes y comentarios
@@ -38,7 +41,11 @@ pnpm install
 
 1. Ve a [Firebase Console](https://console.firebase.google.com/)
 2. Crea un nuevo proyecto o selecciona uno existente
-3. Habilita Authentication (Email/Password)
+3. Habilita Authentication:
+   - Ve a Authentication > Sign-in method
+   - Habilita **Email/Password**
+   - Habilita **Google** como proveedor de autenticación
+   - Nota: Para Google Auth, Firebase configurará automáticamente el OAuth consent screen
 4. Crea una base de datos Firestore
 5. Habilita Storage para subir imágenes
 6. Ve a Project Settings > General > Your apps
@@ -46,13 +53,22 @@ pnpm install
 
 ### 4. Configurar variables de entorno
 
-Copia el archivo `.env.example` a `.env.local`:
+Crea un archivo `.env.local` en la raíz del proyecto (puedes usar `env.template` como referencia):
 
 \`\`\`bash
-cp .env.example .env.local
+cp env.template .env.local
 \`\`\`
 
-Edita `.env.local` y reemplaza los valores con tus credenciales de Firebase.
+Edita `.env.local` y reemplaza los valores con tus credenciales de Firebase:
+
+\`\`\`env
+NEXT_PUBLIC_FIREBASE_API_KEY=tu_api_key_aqui
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=tu_proyecto.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=tu_proyecto_id
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=tu_proyecto.appspot.com
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=tu_sender_id
+NEXT_PUBLIC_FIREBASE_APP_ID=tu_app_id
+\`\`\`
 
 ### 5. Configurar Firestore
 
