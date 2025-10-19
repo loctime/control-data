@@ -147,6 +147,49 @@ Abre [http://localhost:3000](http://localhost:3000) en tu navegador.
 - `npm run start` - Ejecutar en producción
 - `npm run lint` - Ejecutar linter
 
+## Solución de Problemas
+
+### Página de Diagnóstico
+
+Si tienes problemas con la autenticación o el perfil de usuario no se carga, visita:
+
+```
+http://localhost:3000/debug-auth
+```
+
+Esta página te mostrará:
+- ✅ Estado de la autenticación de Firebase
+- ✅ Estado del perfil en Firestore
+- ✅ Información detallada del usuario
+- ✅ Rutas exactas en Firestore
+- ✅ Reglas de seguridad recomendadas
+
+### Problema: Usuario autenticado pero sin perfil
+
+Si inicias sesión con Google pero no aparece tu perfil:
+
+1. **Abre la consola del navegador (F12)** y busca logs que empiecen con:
+   - "Creando documento en:"
+   - "Documento creado exitosamente en:"
+   - "Buscando documento en:"
+   - "Documento encontrado:" o "Documento NO encontrado en:"
+
+2. **Verifica en Firebase Console:**
+   - Ve a Firestore Database
+   - Busca la ruta: `apps/controlDat/users`
+   - Verifica que tu usuario (con tu UID) exista allí
+
+3. **Verifica las reglas de Firestore:**
+   - Ve a Firestore Database → Rules
+   - Asegúrate de que las reglas permitan crear documentos en `apps/controlDat/users`
+   - Las reglas recomendadas están en la página `/debug-auth`
+
+4. **Si el problema persiste:**
+   - Cierra sesión
+   - Ve a Firebase Console → Authentication
+   - Elimina tu usuario
+   - Regístrate nuevamente con Google
+
 ## Personalización del Tema
 
 Los colores del tema se pueden personalizar fácilmente en `app/globals.css`. El sistema usa variables CSS para todos los colores:

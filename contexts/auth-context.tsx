@@ -80,10 +80,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const user = result.user
 
     // Verificar si el usuario ya existe en Firestore
-    const existingProfile = await getUserById(user.uid)
+    let existingProfile = await getUserById(user.uid)
 
     // Si no existe, crear el perfil
     if (!existingProfile) {
+      console.log("Creando nuevo perfil para usuario de Google:", user.uid)
       await createDocument<Omit<User, "id" | "createdAt" | "updatedAt">>("users", user.uid, {
         email: user.email || "",
         displayName: user.displayName || "Usuario",
@@ -93,6 +94,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         following: [],
         avatar: user.photoURL || undefined,
       })
+      
+      // Reintentar cargar el perfil hasta 3 veces con delay
+      for (let i = 0; i < 3; i++) {
+        await new Promise(resolve => setTimeout(resolve, 500)) // Esperar 500ms
+        existingProfile = await getUserById(user.uid)
+        if (existingProfile) {
+          console.log("Perfil cargado exitosamente:", existingProfile)
+          setUserProfile(existingProfile)
+          break
+        }
+        console.log(`Intento ${i + 1} de cargar perfil...`)
+      }
+      
+      if (!existingProfile) {
+        console.error("No se pudo cargar el perfil después de crearlo")
+      }
+    } else {
+      console.log("Usuario existente encontrado:", existingProfile)
+      // Si ya existe, actualizar el estado inmediatamente
+      setUserProfile(existingProfile)
     }
   }
 

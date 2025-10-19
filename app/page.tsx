@@ -62,6 +62,11 @@ export default function HomePage() {
     )
   }
 
+  // Mostrar alerta si el usuario está autenticado pero no tiene perfil
+  if (user && !userProfile && !authLoading) {
+    console.warn("Usuario autenticado sin perfil:", user.uid)
+  }
+
   // Filter posts based on active tab
   const filteredPosts =
     activeTab === "following" && userProfile
@@ -132,22 +137,32 @@ export default function HomePage() {
             {/* User Stats */}
             <Card>
               <CardContent className="pt-6 space-y-4">
-                <div>
-                  <h3 className="font-semibold mb-2">Tu perfil</h3>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Seguidores</span>
-                      <span className="font-semibold">{userProfile?.followers.length || 0}</span>
+                {userProfile ? (
+                  <>
+                    <div>
+                      <h3 className="font-semibold mb-2">Tu perfil</h3>
+                      <p className="text-sm text-muted-foreground mb-3">{userProfile.displayName}</p>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Seguidores</span>
+                          <span className="font-semibold">{userProfile.followers.length || 0}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Siguiendo</span>
+                          <span className="font-semibold">{userProfile.following.length || 0}</span>
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Siguiendo</span>
-                      <span className="font-semibold">{userProfile?.following.length || 0}</span>
-                    </div>
+                    <Button onClick={() => router.push(`/profile/${user.uid}`)} variant="outline" className="w-full">
+                      Ver perfil
+                    </Button>
+                  </>
+                ) : (
+                  <div className="text-center py-4">
+                    <p className="text-sm text-muted-foreground mb-2">Cargando perfil...</p>
+                    <p className="text-xs text-muted-foreground">Si esto tarda mucho, intenta cerrar sesión y volver a entrar</p>
                   </div>
-                </div>
-                <Button onClick={() => router.push(`/profile/${user.uid}`)} variant="outline" className="w-full">
-                  Ver perfil
-                </Button>
+                )}
               </CardContent>
             </Card>
 

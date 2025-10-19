@@ -16,9 +16,11 @@ import {
 import { db } from "./firebase"
 
 // Ruta base para todas las colecciones
+// Esta app comparte Firebase con otras apps, por eso los datos están bajo apps/controlDat/
 const BASE_PATH = "apps/controlDat"
 
-// Helper para obtener la ruta completa
+// Helper para obtener la ruta completa de una colección
+// Retorna: apps/controlDat/{collectionName}
 export const getCollectionPath = (collectionName: string) => {
   return `${BASE_PATH}/${collectionName}`
 }
@@ -74,12 +76,16 @@ export interface Notification {
 export const getDocument = async <T>(collectionName: string, docId: string)
 : Promise<T | null> =>
 {
-  const docRef = doc(db, getCollectionPath(collectionName), docId)
+  const fullPath = `${getCollectionPath(collectionName)}/${docId}`
+  console.log("Buscando documento en:", fullPath)
+  const docRef = doc(db, fullPath)
   const docSnap = await getDoc(docRef)
 
   if (docSnap.exists()) {
+    console.log("Documento encontrado:", docSnap.id)
     return { id: docSnap.id, ...docSnap.data() } as T;
   }
+  console.log("Documento NO encontrado en:", fullPath)
   return null;
 }
 
@@ -101,12 +107,15 @@ export const createDocument = async <T extends DocumentData>(
   docId: string,
   data: T,
 ): Promise<void> => {
-  const docRef = doc(db, getCollectionPath(collectionName), docId)
+  const fullPath = `${getCollectionPath(collectionName)}/${docId}`
+  console.log("Creando documento en:", fullPath)
+  const docRef = doc(db, fullPath)
   await setDoc(docRef, {
     ...data,
     createdAt: Timestamp.now(),
     updatedAt: Timestamp.now(),
   })
+  console.log("Documento creado exitosamente en:", fullPath)
 }
 
 export const updateDocument = async <T extends Partial<DocumentData>>(
