@@ -108,7 +108,7 @@ export function PostCard({ post, author }: PostCardProps) {
             <Heart className={`h-4 w-4 mr-1 ${isLiked ? "fill-current" : ""}`} />
             {likes.length}
           </Button>
-          <Button variant="ghost" size="sm">
+          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); router.push(`/post/${post.id}`) }}>
             <MessageCircle className="h-4 w-4 mr-1" />
             {post.commentCount}
           </Button>

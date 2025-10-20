@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { X, Plus } from "lucide-react"
+import { MediaUploader } from "@/components/media-uploader"
 
 export default function CreatePostPage() {
   const { user, loading: authLoading } = useAuth()
@@ -25,6 +26,9 @@ export default function CreatePostPage() {
   const [newTag, setNewTag] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const [mediaFiles, setMediaFiles] = useState<{ fileId: string; url: string }[]>([])
+  const [videoUrl, setVideoUrl] = useState("")
+  const [mediaType, setMediaType] = useState<"image" | "video" | null>(null)
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -56,6 +60,8 @@ export default function CreatePostPage() {
         userId: user.uid,
         content: content.trim(),
         tags,
+        mediaUrls: mediaType === "image" ? mediaFiles.map(f => f.fileId) : mediaType === "video" && videoUrl ? [videoUrl] : [],
+        mediaType: mediaType ?? undefined,
         likes: [],
         commentCount: 0,
         createdAt: Timestamp.now(),
@@ -159,9 +165,57 @@ export default function CreatePostPage() {
                 )}
               </div>
 
+              {/* Media */}
+              <div className="space-y-3">
+                <Label>Multimedia</Label>
+                <div className="flex gap-2 text-sm">
+                  <Button
+                    type="button"
+                    variant={mediaType === "image" ? "default" : "outline"}
+                    onClick={() => setMediaType("image")}
+                    size="sm"
+                  >
+                    Imágenes
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={mediaType === "video" ? "default" : "outline"}
+                    onClick={() => setMediaType("video")}
+                    size="sm"
+                  >
+                    URL de video
+                  </Button>
+                </div>
+
+                {mediaType === "image" && (
+                  <MediaUploader value={mediaFiles} onChange={setMediaFiles} max={4} />
+                )}
+
+                {mediaType === "video" && (
+                  <div className="space-y-2">
+                    <Input
+                      placeholder="Pega una URL de YouTube/Vimeo/MP4"
+                      value={videoUrl}
+                      onChange={(e) => setVideoUrl(e.target.value)}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Validaremos la URL al publicar. Usa enlaces embebibles o directos.
+                    </p>
+                  </div>
+                )}
+              </div>
+
               {/* Actions */}
               <div className="flex gap-3 pt-4">
-                <Button type="submit" className="flex-1" disabled={loading || !content.trim()}>
+                <Button
+                  type="submit"
+                  className="flex-1"
+                  disabled={
+                    loading ||
+                    !content.trim() ||
+                    (mediaType === "image" && mediaFiles.length === 0 ? false : false)
+                  }
+                >
                   {loading ? "Publicando..." : "Publicar"}
                 </Button>
                 <Button type="button" variant="outline" onClick={() => router.back()}>

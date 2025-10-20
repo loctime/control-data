@@ -12,6 +12,8 @@ import {
   limit,
   type DocumentData,
   Timestamp,
+  addDoc,
+  increment,
 } from "firebase/firestore"
 import { db } from "./firebase"
 
@@ -171,4 +173,34 @@ export const getUnreadNotificationCount = async (userId: string): Promise<number
     where("read", "==", false),
   ])
   return notifications.length
+}
+
+// ----------------------
+// Comentarios
+// ----------------------
+
+export const getCommentsByPost = (postId: string) =>
+  getDocuments<Comment>("comments", [where("postId", "==", postId), orderBy("createdAt", "desc"), limit(50)])
+
+export const createComment = async (
+  postId: string,
+  userId: string,
+  content: string,
+): Promise<void> => {
+  const commentsCollection = collection(db, getCollectionPath("comments"))
+  await addDoc(commentsCollection, {
+    postId,
+    userId,
+    content,
+    createdAt: Timestamp.now(),
+  })
+
+  // Incrementar contador de comentarios del post
+  const postDocRef = doc(db, `${getCollectionPath("posts")}/${postId}`)
+  await updateDoc(postDocRef, { commentCount: increment(1), updatedAt: Timestamp.now() })
+}
+
+export const decrementPostCommentCount = async (postId: string): Promise<void> => {
+  const postDocRef = doc(db, `${getCollectionPath("posts")}/${postId}`)
+  await updateDoc(postDocRef, { commentCount: increment(-1), updatedAt: Timestamp.now() })
 }
